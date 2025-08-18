@@ -10,6 +10,7 @@ import com.vitrina.vitrinaVirtual.domain.dto.StoreDto;
 import com.vitrina.vitrinaVirtual.domain.repository.StoreRepository;
 import com.vitrina.vitrinaVirtual.infraestructura.crud_interface.AlmacenCrudRepository;
 import com.vitrina.vitrinaVirtual.infraestructura.entity.Almacen;
+import com.vitrina.vitrinaVirtual.infraestructura.entity.EntityPreprocessor;
 import com.vitrina.vitrinaVirtual.infraestructura.mapper.AlmacenMapper;
 
 @Repository
@@ -18,8 +19,10 @@ public class AlmacenRepositoryImp implements StoreRepository {
     private AlmacenCrudRepository almacenCrudRepository;
     @Autowired
     private AlmacenMapper almacenMapper;
-    @Override
+    @Autowired
+    private EntityPreprocessor entityPreprocessor;
 
+    @Override
     public Optional<StoreDto> findById(Long storeId) {
         return almacenCrudRepository.findById(storeId)
                 .map(almacenMapper::toStoreDto);
@@ -31,10 +34,11 @@ public class AlmacenRepositoryImp implements StoreRepository {
     }
     @Override
     public StoreDto save(StoreDto storeDto) {
-        Almacen almacen = almacenMapper.toAlmacen(storeDto);
+        Almacen almacen = entityPreprocessor.preprocessStore(storeDto);
         Almacen almacenSaved = almacenCrudRepository.save(almacen);
         return almacenMapper.toStoreDto(almacenSaved);
     }
+
     @Override
     public void deleteById(Long storeId) {
         almacenCrudRepository.deleteById(storeId);

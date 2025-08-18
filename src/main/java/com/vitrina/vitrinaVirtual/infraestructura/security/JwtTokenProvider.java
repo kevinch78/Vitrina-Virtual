@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Component
 public class JwtTokenProvider {
 
-    private final String SECRET_KEY = "mySecretKey123456789012345678901234567890123456789012345678901234567890"; // mínimo 64 caracteres para HS512
+    private final String SECRET_KEY = "mySecretKey123456789012345678901234567890123456789012345678901234567890"; 
     private final long EXPIRATION_TIME = 864_000_000; // 10 días
 
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
@@ -26,7 +26,7 @@ public class JwtTokenProvider {
     public String generateToken(UserDto user) {
         return Jwts.builder()
                 .setSubject(user.getName())
-                .claim("role","ROLE_"+ user.getRole()) // Añade el prefijo ROLE_                .setIssuedAt(new Date())
+                .claim("role","ROLE_"+ user.getRole()) 
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();

@@ -11,13 +11,13 @@ import com.vitrina.vitrinaVirtual.infraestructura.entity.Almacen;
 
 @Mapper(componentModel = "spring")
 public interface AlmacenMapper {
-    @Mapping(source = "almacenId", target = "storeId")
+    @Mapping(source = "id", target = "storeId")
     @Mapping(source = "nombre", target = "name")
     @Mapping(source = "descripcion", target = "description")
     @Mapping(source = "ciudad", target = "city")
     @Mapping(source = "direccion", target = "address")
     @Mapping(source = "contacto", target = "contact")
-    @Mapping(source = "propietario", target = "owner")
+    @Mapping(source = "propietario.nombre", target = "owner")
     @Mapping(source = "imagenUrl", target = "imageUrl")
     @Mapping(source = "publicidadActiva", target = "activeAdvertising")
 
@@ -25,6 +25,8 @@ public interface AlmacenMapper {
     List<StoreDto> toStoreDtos(List<Almacen> almacenes);
 
     @InheritInverseConfiguration
+    @Mapping(target = "propietario", ignore = true)
+    @Mapping(target = "productos", ignore = true)
     Almacen toAlmacen(StoreDto storeDto);
     List<Almacen> toAlmacenes(List<StoreDto> storeDtos);
 

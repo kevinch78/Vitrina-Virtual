@@ -3,6 +3,7 @@ package com.vitrina.vitrinaVirtual.infraestructura.repositories;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 import com.vitrina.vitrinaVirtual.domain.dto.LoginRequestDto;
 import com.vitrina.vitrinaVirtual.domain.dto.RegistrationRequestDto;
 import com.vitrina.vitrinaVirtual.domain.dto.UserDto;
@@ -32,6 +33,7 @@ public class UsuarioRepository implements UserRepository {
         usuario = usuarioCrudRepository.save(usuario);
         return usuarioMapper.toUserDto(usuario);
     }
+
     @Override
     public UserDto save(RegistrationRequestDto registrationRequestDto) {
         if (registrationRequestDto == null || registrationRequestDto.getPassword() == null || registrationRequestDto.getPassword().isEmpty()) {
@@ -52,24 +54,27 @@ public class UsuarioRepository implements UserRepository {
 
     @Override
     public UserDto findByUserName(String username) {
-        return usuarioMapper.toUserDto(
-            usuarioCrudRepository.findByNombre(username)
-        );
+        return usuarioCrudRepository.findByNombre(username)
+            .map(usuarioMapper::toUserDto)
+            .orElse(null); // Devuelve null si no se encuentra
     }
+
     @Override
     public LoginRequestDto findLoginRequestByUsername(String username) {
-        Usuario usuario = usuarioCrudRepository.findByNombre(username);
+        Usuario usuario = usuarioCrudRepository.findByNombre(username)
+            .orElse(null); // Devuelve null si no se encuentra
         return usuario != null ? solicitudMapper.toLoginRequestDto(usuario) : null;
     }
+
     @Override
     public List<UserDto> findAll() {
-        List<Usuario> usuario = usuarioCrudRepository.findAll();
-        return usuarioMapper.toUserDtos(usuario);
+        List<Usuario> usuarios = (List<Usuario>) usuarioCrudRepository.findAll();
+        return usuarioMapper.toUserDtos(usuarios);
     }
+
     @Override
     public Usuario findByUsernameFromEntity(String username) {
-        return usuarioCrudRepository.findByNombre(username);
+        return usuarioCrudRepository.findByNombre(username)
+            .orElse(null); // Devuelve null si no se encuentra
     }
-    
-
 }
