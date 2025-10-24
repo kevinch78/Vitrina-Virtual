@@ -35,6 +35,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/stores/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/products**").hasAuthority("ROLE_ADMIN")
+                // Endpoints de documentación OpenAPI/Swagger - SIN AUTENTICACIÓN
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml", "/v3/api-docs.yml").permitAll()
+                .requestMatchers("/swagger-resources/**", "/webjars/**").permitAll()
+                .requestMatchers("/redoc.html", "/redoc/**").permitAll()
+                .requestMatchers("/favicon.ico").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permite OPTIONS
                 .anyRequest().authenticated()
             )

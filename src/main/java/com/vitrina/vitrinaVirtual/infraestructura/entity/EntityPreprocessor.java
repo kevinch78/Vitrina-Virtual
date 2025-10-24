@@ -4,14 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.vitrina.vitrinaVirtual.infraestructura.crud_interface.AlmacenCrudRepository;
-import com.vitrina.vitrinaVirtual.infraestructura.crud_interface.UsuarioCrudRepository; // Cambiado a Usuario
-import com.vitrina.vitrinaVirtual.infraestructura.entity.Almacen;
-import com.vitrina.vitrinaVirtual.infraestructura.entity.Producto;
-import com.vitrina.vitrinaVirtual.infraestructura.entity.Usuario; // Cambiado a Usuario
+import com.vitrina.vitrinaVirtual.infraestructura.crud_interface.UsuarioCrudRepository; 
 import com.vitrina.vitrinaVirtual.domain.dto.ProductDto;
 import com.vitrina.vitrinaVirtual.domain.dto.StoreDto;
-
-import java.util.Optional;
 
 @Component
 public class EntityPreprocessor {
@@ -30,11 +25,18 @@ public class EntityPreprocessor {
         producto.setEstilo(productDto.getStyle());
         producto.setClima(productDto.getClimate());
         producto.setGenero(productDto.getGender());
-        producto.setCategoria(productDto.getCategory());
-        producto.setColor(productDto.getColor());
-        producto.setMaterial(productDto.getMaterial());
         producto.setOcasion(productDto.getOccasion());
+        producto.setMaterial(productDto.getMaterial());
+        producto.setGarmentType(productDto.getGarmentType());
+        producto.setSubcategoria(productDto.getSubcategory());
+        producto.setPrimaryColor(productDto.getPrimaryColor());
+        producto.setSecondaryColors(productDto.getSecondaryColors());
+        producto.setColorFamily(productDto.getColorFamily());
+        producto.setPattern(productDto.getPattern());
+        producto.setFit(productDto.getFit());
+        producto.setFormality(productDto.getFormality());
         producto.setImagenUrl(productDto.getImageUrl());
+        
         if (productDto.getStoreId() != null) {
             Almacen almacen = almacenCrudRepository.findById(productDto.getStoreId())
                 .orElseThrow(() -> new RuntimeException("Almacen con ID " + productDto.getStoreId() + " no encontrado"));

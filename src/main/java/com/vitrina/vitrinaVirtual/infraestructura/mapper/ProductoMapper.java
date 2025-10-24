@@ -18,8 +18,14 @@ public interface ProductoMapper {
     @Mapping(source = "estilo", target = "style")
     @Mapping(source = "clima", target = "climate")
     @Mapping(source = "genero", target = "gender")
-    @Mapping(source = "categoria", target = "category")
-    @Mapping(source = "color", target = "color")
+    @Mapping(source = "subcategoria", target = "subcategory")
+    @Mapping(source = "primaryColor", target = "primaryColor")
+    @Mapping(source = "secondaryColors", target = "secondaryColors")
+    @Mapping(source = "colorFamily", target = "colorFamily")
+    @Mapping(source = "pattern", target = "pattern")
+    @Mapping(source = "fit", target = "fit")
+    @Mapping(source = "formality", target = "formality")
+    @Mapping(source = "garmentType", target = "garmentType")
     @Mapping(source = "material", target = "material")
     @Mapping(source = "ocasion", target = "occasion")
     @Mapping(source = "imagenUrl", target = "imageUrl")
@@ -28,7 +34,26 @@ public interface ProductoMapper {
     ProductDto toProductDto(Producto producto);
     List<ProductDto> toProductDtos(List<Producto> productos);
 
-    @InheritInverseConfiguration
+    @InheritInverseConfiguration // Mantenemos esto para los campos que coinciden
+    @Mapping(source = "idProduct", target = "idProducto")
+    @Mapping(source = "name", target = "nombre")
+    @Mapping(source = "price", target = "precio")
+    @Mapping(source = "stock", target = "existencia")
+    @Mapping(source = "description", target = "descripcion")
+    @Mapping(source = "style", target = "estilo")
+    @Mapping(source = "climate", target = "clima")
+    @Mapping(source = "gender", target = "genero")
+    @Mapping(source = "subcategory", target = "subcategoria")
+    @Mapping(source = "primaryColor", target = "primaryColor")
+    @Mapping(source = "secondaryColors", target = "secondaryColors")
+    @Mapping(source = "pattern", target = "pattern")
+    @Mapping(source = "fit", target = "fit")
+    @Mapping(source = "formality", target = "formality")
+    @Mapping(source = "garmentType", target = "garmentType") // Mapeo inverso explícito
+    @Mapping(source = "material", target = "material")
+    @Mapping(source = "occasion", target = "ocasion")
+    @Mapping(source = "imageUrl", target = "imagenUrl")
+    @Mapping(target = "almacen", ignore = true) // Ignoramos el objeto completo para evitar ciclos
     Producto toProducto(ProductDto productDto);
     List<Producto> toProductos(List<ProductDto> productDtos);
 

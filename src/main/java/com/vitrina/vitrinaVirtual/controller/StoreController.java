@@ -14,11 +14,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stores")
+@Tag(name = "Tiendas", description = "Gestión de tiendas y almacenes")
+@SecurityRequirement(name = "bearerAuth")
 public class StoreController {
     @Autowired
     private StoreService storeService;
@@ -29,9 +38,15 @@ public class StoreController {
 
     @PostMapping(consumes = "multipart/form-data")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Crear tienda", description = "Crea una nueva tienda con imagen opcional")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Tienda creada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de la tienda inválidos"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado - Solo administradores")
+    })
     public ResponseEntity<StoreDto> createStore(
-            @RequestPart("storeDto") String storeDtoJson, // Recibe el JSON como string
-            @RequestPart(value = "imagen", required = false) MultipartFile imagen) throws Exception {
+            @Parameter(description = "Datos de la tienda en formato JSON") @RequestPart("storeDto") String storeDtoJson,
+            @Parameter(description = "Imagen de la tienda") @RequestPart(value = "imagen", required = false) MultipartFile imagen) throws Exception {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         logger.debug("Executing createStore for user: " + username); // Usa el logger
         // Deserializa el JSON a StoreDto

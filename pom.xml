@@ -75,10 +75,6 @@
 			<version>1.5.5.Final</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
 	<dependency>
 		<groupId>io.jsonwebtoken</groupId>
 		<artifactId>jjwt-api</artifactId>
@@ -106,6 +102,11 @@
         <artifactId>cloudinary-http44</artifactId>
         <version>1.33.0</version>
     </dependency>
+	<dependency>
+		<groupId>org.springdoc</groupId>
+		<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+		<version>2.2.0</version>
+	</dependency>
 
 	</dependencies>
 
@@ -122,7 +123,7 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>$1.18.30</version> <!-- O usa la versión implícita de spring-boot-starter-parent -->
+							<version>1.18.30</version>
 						</path>
 						<path>
 							<groupId>org.mapstruct</groupId>

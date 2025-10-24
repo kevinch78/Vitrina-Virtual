@@ -37,6 +37,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        
+        // Excluir endpoints de documentación del filtro JWT
+        String requestPath = request.getRequestURI();
+        if (isDocumentationEndpoint(requestPath)) {
+            logger.debug("Skipping JWT filter for documentation endpoint: {}", requestPath);
+            chain.doFilter(request, response);
+            return;
+        }
+        
         String header = request.getHeader("Authorization");
         String token = null;
         String username = null;
@@ -78,5 +87,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         chain.doFilter(request, response);
+    }
+    
+    /**
+     * Verifica si la ruta es un endpoint de documentación que no debe requerir autenticación
+     */
+    private boolean isDocumentationEndpoint(String requestPath) {
+        return requestPath.startsWith("/swagger-ui") ||
+               requestPath.startsWith("/v3/api-docs") ||
+               requestPath.startsWith("/swagger-resources") ||
+               requestPath.startsWith("/webjars") ||
+               requestPath.startsWith("/redoc") ||
+               requestPath.equals("/favicon.ico") ||
+               requestPath.equals("/swagger-ui.html") ||
+               requestPath.equals("/redoc.html");
     }
 }

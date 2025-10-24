@@ -36,6 +36,7 @@ public class Producto {
     @Column(name = "descripcion")
     private String descripcion;
 
+    // Atributos de Estilismo
     @Column(name = "estilo")
     private String estilo;
 
@@ -45,18 +46,38 @@ public class Producto {
     @Column(name = "genero")
     private String genero;
 
-    @Column(name = "categoria")
-    private String categoria;
-
-    @Column(name = "color")
-    private String color;
+    @Column(name = "ocasion")
+    private String ocasion;
 
     @Column(name = "material")
     private String material;
 
-    @Column(name = "ocasion")
-    private String ocasion;
+    // Nuevos atributos para Outfits Inteligentes
+    @Column(name = "garment_type")
+    private String garmentType;
 
+    @Column(name = "subcategoria")
+    private String subcategoria;
+
+    @Column(name = "primary_color")
+    private String primaryColor;
+
+    @Column(name = "secondary_colors")
+    private String secondaryColors;
+
+    @Column(name = "color_family")
+    private String colorFamily;
+
+    @Column(name = "pattern")
+    private String pattern;
+
+    @Column(name = "fit")
+    private String fit;
+
+    @Column(name = "formality")
+    private Integer formality;
+
+    // Atributos existentes
     @Column(name = "imagen_url", length = 512)
     private String imagenUrl;
 

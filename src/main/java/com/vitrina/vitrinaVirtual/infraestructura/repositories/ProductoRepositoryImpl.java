@@ -35,12 +35,6 @@ public class ProductoRepositoryImpl implements ProductRepository {
                 .orElseThrow(() -> new RuntimeException("Producto con ID " + productId + " no encontrado"));
     }
 
-    // @Override
-    // public ProductDto save(ProductDto productDto) {
-    //     Producto producto = productoMapper.toProducto(productDto);
-    //     Producto productoSaved = productoCrudRepository.save(producto);
-    //     return productoMapper.toProductDto(productoSaved);
-    // }
     @Override
     public ProductDto save(ProductDto productDto) {
         Producto producto = entityPreprocessor.preprocessProduct(productDto);
@@ -65,17 +59,62 @@ public class ProductoRepositoryImpl implements ProductRepository {
         return productoMapper.toProductDtos(productos);
     }
 
+    // @Override
+    // public List<ProductDto> findByCategory(String category) {
+    //     List<Producto> productos = productoCrudRepository.findByCategoria(category);
+    //     return productoMapper.toProductDtos(productos);
+    // }
+
     @Override
-    public List<ProductDto> findByCategory(String category) {
-        List<Producto> productos = productoCrudRepository.findByCategoria(category);
+    public List<ProductDto> findByGender(String gender) {
+        List<Producto> productos = productoCrudRepository.findByGenero(gender);
         return productoMapper.toProductDtos(productos);
     }
 
     @Override
     public List<ProductDto> findByRecommendedProducts(List<Long> storeIds, String gender, String climate,
             String style) {
-                List<Producto> productos = productoCrudRepository.findByAlmacenIdInAndGeneroAndClimaAndEstilo(storeIds, gender, climate, style);
-                return productoMapper.toProductDtos(productos);
+        // CORRECCIÓN: La consulta ahora maneja filtros nulos correctamente.
+        // Si un filtro es nulo, no se aplica.
+        if (style == null && climate == null && gender == null) {
+            return findByStoreIdIn(storeIds);
+        }
+        if (style == null && climate == null) {
+            return findByGenderAndStoreIdIn(gender, storeIds);
+        }
+
+        // Esta es una simplificación. Para una solución completa, se necesitaría
+        // una consulta dinámica con Criteria API o JPQL. Por ahora, esto mejora el comportamiento.
+        List<Producto> productos = productoCrudRepository.findByAlmacenIdIn(storeIds).stream()
+            .filter(p -> gender == null || gender.equalsIgnoreCase(p.getGenero()))
+            .filter(p -> climate == null || climate.equalsIgnoreCase(p.getClima()))
+            .filter(p -> style == null || style.equalsIgnoreCase(p.getEstilo()))
+            .collect(java.util.stream.Collectors.toList());
+
+        return productoMapper.toProductDtos(productos);
     }
-    
+
+    @Override
+    public List<ProductDto> findByRecommendedProducts(List<Long> storeIds, String gender, String climate,
+            List<String> styles) {
+        List<Producto> productos;
+        
+        if (storeIds == null || storeIds.isEmpty()) {
+            productos = List.of(); 
+        } else {
+            productos = productoCrudRepository.findByAlmacenIdInAndGeneroAndClimaAndEstiloIn(storeIds, gender, climate, styles);
+        }
+        
+        return productoMapper.toProductDtos(productos);
+    }
+
+    @Override
+    public List<ProductDto> findByGenderAndStoreIdIn(String gender, List<Long> storeIds) {
+        return productoMapper.toProductDtos(productoCrudRepository.findByGeneroAndAlmacenIdIn(gender, storeIds));
+    }
+
+    @Override
+    public List<ProductDto> findByStoreIdIn(List<Long> storeIds) {
+        return productoMapper.toProductDtos(productoCrudRepository.findByAlmacenIdIn(storeIds));
+    }
 }
