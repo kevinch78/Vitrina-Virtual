@@ -4,6 +4,7 @@ import com.vitrina.vitrinaVirtual.domain.dto.ProductDto;
 import com.vitrina.vitrinaVirtual.domain.dto.ProductWithStoreDto;
 import com.vitrina.vitrinaVirtual.domain.dto.OutfitRecommendation;
 import com.vitrina.vitrinaVirtual.domain.service.ProductService;
+import com.vitrina.vitrinaVirtual.domain.service.CloudinaryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.cloudinary.Cloudinary;
 import org.apache.commons.logging.Log;
@@ -30,9 +31,8 @@ import java.util.*;
 @SecurityRequirement(name = "bearerAuth")
 public class ProductController {
     @Autowired private ProductService productService;
-    @Autowired private Cloudinary cloudinary;
+    @Autowired private CloudinaryService cloudinaryService; // Inyectamos el nuevo servicio
     private static final Log logger = LogFactory.getLog(ProductController.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostMapping(consumes = "multipart/form-data")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -43,27 +43,19 @@ public class ProductController {
         @ApiResponse(responseCode = "403", description = "Acceso denegado - Solo administradores")
     })
     public ResponseEntity<ProductDto> createProduct(
-            @Parameter(description = "Datos del producto en formato JSON") @RequestPart("productDto") String productDtoJson,
+            @Parameter(description = "Datos del producto en formato JSON") @RequestPart("productDto") ProductDto productDto,
             @Parameter(description = "Imagen del producto") @RequestPart(value = "image", required = false) MultipartFile image
     ) throws Exception {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         logger.debug("Executing createProduct for user: " + username);
 
-        ProductDto productDto = objectMapper.readValue(productDtoJson, ProductDto.class);
-
+        String imageBase64 = null;
         if (image != null && !image.isEmpty()) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> uploadResult = (Map<String, Object>) cloudinary.uploader().upload(
-                    image.getBytes(),
-                    Map.of(
-                            "folder", "vitrina_virtual/products",
-                            "public_id", productDto.getName() + "_" + System.currentTimeMillis(),
-                            "resource_type", "image"
-                    )
-            );
-            productDto.setImageUrl(uploadResult.get("secure_url").toString());
+            CloudinaryService.UploadResult uploadResult = cloudinaryService.uploadImageAndGetBase64(image, "vitrina_virtual/products", productDto.getName());
+            productDto.setImageUrl(uploadResult.url());
+            imageBase64 = uploadResult.base64();
         }
-        return new ResponseEntity<>(productService.saveProduct(productDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.saveProduct(productDto, imageBase64), HttpStatus.CREATED);
     }
 
     @GetMapping

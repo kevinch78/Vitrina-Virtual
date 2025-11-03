@@ -26,14 +26,8 @@ public class GeminiResponseParser {
                 throw new OutfitGenerationException("La respuesta de la IA estaba vacía.");
             }
 
-            JsonNode root = objectMapper.readTree(response);
-            String text = extractTextFromResponse(root);
-
-            if (text == null || text.isBlank()) {
-                throw new OutfitGenerationException("No se pudo extraer el contenido de texto de la respuesta de la IA.");
-            }
-
-            String jsonBlock = extractFirstJsonObject(stripCodeFences(text).trim());
+            // Usamos el método estático refactorizado para limpiar la respuesta.
+            String jsonBlock = extractJsonContent(response);
             if (jsonBlock == null) {
                 throw new OutfitGenerationException("La respuesta de la IA no contenía un bloque JSON válido.");
             }
@@ -41,8 +35,6 @@ public class GeminiResponseParser {
             JsonNode outfitNode = objectMapper.readTree(jsonBlock);
 
             List<ProductWithStoreDto> selectedProducts = extractSelectedProducts(outfitNode, products);
-            // Ya no completamos el outfit si viene incompleto. Confiamos en la IA.
-            // selectedProducts = validateAndCompleteOutfit(selectedProducts, categories);
             String accesorio = extractAccessory(outfitNode, categories);
 
             return new OutfitRecommendation(selectedProducts, accesorio);
@@ -94,12 +86,6 @@ public class GeminiResponseParser {
         return accesorio;
     }
 
-    private String extractTextFromResponse(JsonNode root) {
-        return Optional.ofNullable(
-            root.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText(null)
-        ).orElse(null);
-    }
-
     private static String stripCodeFences(String s) {
         if (s == null) return "";
         String cleaned = s.trim();
@@ -135,5 +121,31 @@ public class GeminiResponseParser {
             }
         }
         return null;
+    }
+
+    /**
+     * Extrae el bloque de texto JSON principal de la respuesta completa de la API de Gemini.
+     * Este método es público y estático para que pueda ser reutilizado por otros parsers.
+     * @param fullApiResponse La respuesta completa de la API.
+     * @return El string JSON limpio, o null si no se encuentra.
+     */
+    public static String extractJsonContent(String fullApiResponse) {
+        try {
+            // Intenta parsear la respuesta completa como si fuera la estructura de Gemini
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(fullApiResponse);
+            String text = Optional.ofNullable(
+                root.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText(null)
+            ).orElse(null);
+
+            if (text != null && !text.isBlank()) {
+                // Si se extrajo texto, se limpia y se busca el JSON dentro.
+                return extractFirstJsonObject(stripCodeFences(text).trim());
+            }
+        } catch (Exception e) {
+            // Si el parseo falla, es probable que la respuesta ya sea el JSON (o basura).
+        }
+        // Como fallback, intenta limpiar la respuesta original directamente.
+        return extractFirstJsonObject(stripCodeFences(fullApiResponse).trim());
     }
 }

@@ -29,6 +29,7 @@ public interface ProductoMapper {
     @Mapping(source = "material", target = "material")
     @Mapping(source = "ocasion", target = "occasion")
     @Mapping(source = "imagenUrl", target = "imageUrl")
+    @Mapping(source = "iaDescription", target = "iaDescription")
     @Mapping(source = "almacen.id", target = "storeId")
 
     ProductDto toProductDto(Producto producto);
@@ -53,6 +54,7 @@ public interface ProductoMapper {
     @Mapping(source = "material", target = "material")
     @Mapping(source = "occasion", target = "ocasion")
     @Mapping(source = "imageUrl", target = "imagenUrl")
+    @Mapping(source = "iaDescription", target = "iaDescription")
     @Mapping(target = "almacen", ignore = true) // Ignoramos el objeto completo para evitar ciclos
     Producto toProducto(ProductDto productDto);
     List<Producto> toProductos(List<ProductDto> productDtos);

@@ -28,6 +28,8 @@ public class ProductDto {
     private String pattern;     // Estampado: "Liso", "Rayas", "Cuadros", "Floral"
     private String fit;         // Corte: "Ajustado", "Regular", "Holgado", "Oversize"
     private Integer formality;  // Nivel de formalidad (1-5)
+    private String iaDescription; //Descripcion creada por la IA despues de analizar la img
+
 
     // Atributos existentes
     private String imageUrl;

@@ -22,18 +22,18 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByUsernameFromEntity(username);
-        if (usuario == null) {
-            throw new UsernameNotFoundException("Usuario no encontrado: " + username);
-        }
+        // El 'username' que llega aquí es el email extraído del token.
+        // Usamos nuestro nuevo método para buscar por email.
+        Usuario usuario = usuarioRepository.findByEmailFromEntity(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + username));
 
         // Convertir el rol a GrantedAuthority
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()));
 
-        // Crear UserDetails con los datos del usuario
+        // El primer parámetro de User es el "username" que Spring usará. Debe ser el identificador único.
         return new User(
-                usuario.getNombre(),
+                usuario.getCorreo(),
                 usuario.getContrasena(),
                 authorities
         );

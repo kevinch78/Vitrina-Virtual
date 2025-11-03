@@ -9,4 +9,5 @@ import com.vitrina.vitrinaVirtual.infraestructura.entity.Usuario;
 
 public interface UsuarioCrudRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByNombre(String nombre);
+    Optional<Usuario> findByCorreo(String correo);
 }

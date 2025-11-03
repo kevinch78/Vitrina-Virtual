@@ -36,16 +36,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(LoginRequestDto loginRequestDto) {
-        UserDto userDto = userRepository.findByUserName(loginRequestDto.getName());
-        if (userDto == null) {
-            throw new RuntimeException("Invalid credentials");
-        }
-        Usuario usuario = userRepository.findByUsernameFromEntity(loginRequestDto.getName());
-        if (usuario == null || usuario.getContrasena() == null || 
+        // 1. Buscamos al usuario por email UNA SOLA VEZ.
+        Usuario usuario = userRepository.findByEmailFromEntity(loginRequestDto.getEmail())
+                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
+
+        // 2. Verificamos la contraseña.
+        if (usuario.getContrasena() == null ||
             !passwordEncoder.matches(loginRequestDto.getPassword(), usuario.getContrasena())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new RuntimeException("Credenciales inválidas");
         }
-        return jwtTokenProvider.generateToken(userDto);
+        // 3. Generamos el token directamente desde la entidad.
+        return jwtTokenProvider.generateToken(usuario);
     }
 
     private boolean isValidRole(Rol role) {
@@ -57,15 +58,17 @@ public class AuthServiceImpl implements AuthService {
         return false;
     }
     @Override
-    public UserProfileDto getUserProfile(String username) {
-        UserDto userDto = userRepository.findByUserName(username);
-        if (userDto == null) {
-            throw new RuntimeException("User not found");
-        }
+    public UserProfileDto getUserProfile(String email) {
+        // El 'username' que viene del token es en realidad el email. Buscamos por email.
+        // Usamos findByEmailFromEntity para obtener la entidad y luego la mapeamos.
+        Usuario usuario = userRepository.findByEmailFromEntity(email)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+
+        // Mapeamos la entidad a un DTO de perfil
         UserProfileDto profile = new UserProfileDto();
-        profile.setName(userDto.getName());
-        profile.setEmail(userDto.getEmail());
-        profile.setRole(userDto.getRole() != null ? userDto.getRole().name() : null); // Convertir RolJava a String
+        profile.setName(usuario.getNombre());
+        profile.setEmail(usuario.getCorreo());
+        profile.setRole(usuario.getRol() != null ? usuario.getRol().name() : null);
         return profile;
     }
     

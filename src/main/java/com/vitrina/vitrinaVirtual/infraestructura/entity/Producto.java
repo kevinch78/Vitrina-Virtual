@@ -77,6 +77,14 @@ public class Producto {
     @Column(name = "formality")
     private Integer formality;
 
+    /**
+     * Descripción detallada y de marketing del producto, generada por la IA.
+     * Se utiliza para construir prompts de alta calidad para la generación de
+     * imágenes.
+     */
+    @Column(name = "ia_description", columnDefinition = "TEXT")
+    private String iaDescription;
+
     // Atributos existentes
     @Column(name = "imagen_url", length = 512)
     private String imagenUrl;
@@ -85,4 +93,3 @@ public class Producto {
     @JoinColumn(name = "id_almacen")
     private Almacen almacen;
 }
-

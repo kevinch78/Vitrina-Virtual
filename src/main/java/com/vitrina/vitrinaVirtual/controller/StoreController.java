@@ -2,8 +2,7 @@ package com.vitrina.vitrinaVirtual.controller;
 
 import com.vitrina.vitrinaVirtual.domain.dto.StoreDto;
 import com.vitrina.vitrinaVirtual.domain.service.StoreService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.cloudinary.Cloudinary;
+import com.vitrina.vitrinaVirtual.domain.service.CloudinaryService; // Importar el nuevo servicio
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,16 +12,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stores")
@@ -30,11 +26,10 @@ import java.util.Map;
 @SecurityRequirement(name = "bearerAuth")
 public class StoreController {
     @Autowired
-    private StoreService storeService;
+    private StoreService storeService; // Mantener el servicio de tiendas sorry for the delay,He fell into drugs, I forgot about the video.
     @Autowired
-    private Cloudinary cloudinary;
+    private CloudinaryService cloudinaryService; // Inyectar el nuevo servicio de Cloudinary
     private static final Log logger = LogFactory.getLog(StoreController.class);
-    private final ObjectMapper objectMapper = new ObjectMapper(); // Para deserializar JSON
 
     @PostMapping(consumes = "multipart/form-data")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -45,21 +40,13 @@ public class StoreController {
         @ApiResponse(responseCode = "403", description = "Acceso denegado - Solo administradores")
     })
     public ResponseEntity<StoreDto> createStore(
-            @Parameter(description = "Datos de la tienda en formato JSON") @RequestPart("storeDto") String storeDtoJson,
+            @Parameter(description = "Datos de la tienda en formato JSON") @RequestPart("storeDto") StoreDto storeDto,
             @Parameter(description = "Imagen de la tienda") @RequestPart(value = "imagen", required = false) MultipartFile imagen) throws Exception {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         logger.debug("Executing createStore for user: " + username); // Usa el logger
-        // Deserializa el JSON a StoreDto
-        StoreDto storeDto = objectMapper.readValue(storeDtoJson, StoreDto.class);
+
         if (imagen != null && !imagen.isEmpty()) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> uploadResult = (Map<String, Object>) cloudinary.uploader()
-                    .upload(imagen.getBytes(), Map.of(
-                            "folder", "vitrina_virtual/stores",
-                            "public_id", storeDto.getName() + "_" + System.currentTimeMillis(),
-                            "resource_type", "image"
-                    ));
-            storeDto.setImageUrl(uploadResult.get("secure_url").toString());
+            storeDto.setImageUrl(cloudinaryService.uploadImage(imagen, "vitrina_virtual/stores", storeDto.getName()));
         }
         return new ResponseEntity<>(storeService.createStore(storeDto), HttpStatus.CREATED);
     }

@@ -36,6 +36,7 @@ public class EntityPreprocessor {
         producto.setFit(productDto.getFit());
         producto.setFormality(productDto.getFormality());
         producto.setImagenUrl(productDto.getImageUrl());
+        producto.setIaDescription(productDto.getIaDescription()); // <-- ¡LA LÍNEA QUE FALTABA!
         
         if (productDto.getStoreId() != null) {
             Almacen almacen = almacenCrudRepository.findById(productDto.getStoreId())

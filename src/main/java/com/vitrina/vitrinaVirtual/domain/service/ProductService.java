@@ -9,7 +9,7 @@ import com.vitrina.vitrinaVirtual.domain.dto.ProductWithStoreDto;
 public interface ProductService {
     List<ProductDto> getAllProducts();
     ProductDto getProductById(Long productId);
-    ProductDto saveProduct(ProductDto productDto);
+    ProductDto saveProduct(ProductDto productDto, String imageBase64);
     void deleteProductById(Long productId);
     List<ProductDto> getProductsByStyle(String style);
     List<ProductDto> getProductsByStoreId(Long storeId);

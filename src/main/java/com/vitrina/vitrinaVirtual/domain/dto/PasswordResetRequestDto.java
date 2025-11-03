@@ -5,10 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class LoginRequestDto {
+public class PasswordResetRequestDto {
     @NotBlank(message = "El email no puede estar vacío.")
     @Email(message = "El formato del email no es válido.")
     private String email;
-    @NotBlank(message = "La contraseña no puede estar vacía.")
-    private String password;
 }
