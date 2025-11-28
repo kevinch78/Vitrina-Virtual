@@ -4,9 +4,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import com.vitrina.vitrinaVirtual.domain.dto.UserDto;
+import com.vitrina.vitrinaVirtual.infraestructura.entity.Usuario;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -18,15 +18,21 @@ import jakarta.servlet.http.HttpServletRequest;
 @Component
 public class JwtTokenProvider {
 
-    private final String SECRET_KEY = "mySecretKey123456789012345678901234567890123456789012345678901234567890"; // mínimo 64 caracteres para HS512
     private final long EXPIRATION_TIME = 864_000_000; // 10 días
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+    private final Key key;
 
-    public String generateToken(UserDto user) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+        if (secretKey == null || secretKey.length() < 64) {
+            throw new IllegalArgumentException("La clave secreta de JWT debe tener al menos 64 caracteres.");
+        }
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public String generateToken(Usuario user) {
         return Jwts.builder()
-                .setSubject(user.getName())
-                .claim("role","ROLE_"+ user.getRole()) // Añade el prefijo ROLE_                .setIssuedAt(new Date())
+                .setSubject(user.getCorreo())
+                .claim("role", "ROLE_" + user.getRol())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();

@@ -1,17 +1,17 @@
 package com.vitrina.vitrinaVirtual.infraestructura.repositories;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import com.vitrina.vitrinaVirtual.domain.dto.LoginRequestDto;
+
 import com.vitrina.vitrinaVirtual.domain.dto.RegistrationRequestDto;
 import com.vitrina.vitrinaVirtual.domain.dto.UserDto;
 import com.vitrina.vitrinaVirtual.domain.repository.UserRepository;
 import com.vitrina.vitrinaVirtual.infraestructura.crud_interface.UsuarioCrudRepository;
 import com.vitrina.vitrinaVirtual.infraestructura.entity.Usuario;
-import com.vitrina.vitrinaVirtual.infraestructura.mapper.RegistrationMapper;
-import com.vitrina.vitrinaVirtual.infraestructura.mapper.SolicitudMapper;
 import com.vitrina.vitrinaVirtual.infraestructura.mapper.UsuarioMapper;
+import com.vitrina.vitrinaVirtual.infraestructura.mapper.RegistrationMapper;
 
 @Repository
 public class UsuarioRepository implements UserRepository {
@@ -19,10 +19,6 @@ public class UsuarioRepository implements UserRepository {
     private UsuarioCrudRepository usuarioCrudRepository;
     @Autowired
     private UsuarioMapper usuarioMapper;
-    @Autowired
-    private SolicitudMapper solicitudMapper;
-    // @Autowired
-    // private PasswordEncoder passwordEncoder;
     @Autowired
     private RegistrationMapper registrationMapper;
 
@@ -32,6 +28,7 @@ public class UsuarioRepository implements UserRepository {
         usuario = usuarioCrudRepository.save(usuario);
         return usuarioMapper.toUserDto(usuario);
     }
+
     @Override
     public UserDto save(RegistrationRequestDto registrationRequestDto) {
         if (registrationRequestDto == null || registrationRequestDto.getPassword() == null || registrationRequestDto.getPassword().isEmpty()) {
@@ -49,27 +46,32 @@ public class UsuarioRepository implements UserRepository {
         usuario = usuarioCrudRepository.save(usuario);
         return usuarioMapper.toUserDto(usuario);
     }
+    @Override
+    public Usuario saveEntity(Usuario usuario) {
+        return usuarioCrudRepository.save(usuario);
+    }
 
     @Override
     public UserDto findByUserName(String username) {
-        return usuarioMapper.toUserDto(
-            usuarioCrudRepository.findByNombre(username)
-        );
+        return usuarioCrudRepository.findByNombre(username)
+            .map(usuarioMapper::toUserDto)
+            .orElse(null); // Devuelve null si no se encuentra
     }
-    @Override
-    public LoginRequestDto findLoginRequestByUsername(String username) {
-        Usuario usuario = usuarioCrudRepository.findByNombre(username);
-        return usuario != null ? solicitudMapper.toLoginRequestDto(usuario) : null;
-    }
+
     @Override
     public List<UserDto> findAll() {
-        List<Usuario> usuario = usuarioCrudRepository.findAll();
-        return usuarioMapper.toUserDtos(usuario);
+        List<Usuario> usuarios = (List<Usuario>) usuarioCrudRepository.findAll();
+        return usuarioMapper.toUserDtos(usuarios);
     }
+
     @Override
     public Usuario findByUsernameFromEntity(String username) {
-        return usuarioCrudRepository.findByNombre(username);
+        return usuarioCrudRepository.findByNombre(username)
+            .orElse(null); // Devuelve null si no se encuentra
     }
-    
 
+    @Override
+    public Optional<Usuario> findByEmailFromEntity(String email) {
+        return usuarioCrudRepository.findByCorreo(email);
+    }
 }
